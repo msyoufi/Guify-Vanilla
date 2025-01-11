@@ -1,0 +1,22 @@
+{
+  "name": "guify",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "dev": "tsc",
+    "build": "tsc && xcopy src\\*.* dist /E /I /EXCLUDE:exclude.txt"
+  },
+  "keywords": [],
+  "author": "Majd Syoufi",
+  "license": "ISC",
+  "description": "Forms builder for managing data entries",
+  "dependencies": {
+    "better-sqlite3": "^11.7.2"
+  },
+  "devDependencies": {
+    "electron": "^33.3.1",
+    "typescript": "^5.7.3"
+  }
+}
