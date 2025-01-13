@@ -19,7 +19,42 @@ function initDB(): void {
   }
 }
 
-export function insertFormControl(event: IpcMainInvokeEvent, control: FormControlNoID): number {
+export function insertGui(_: IpcMainInvokeEvent, guiName: string): number {
+  try {
+    const result = db.prepare(`
+      INSERT INTO guis (gui_name) VALUES (?)
+    `).run(guiName);
+
+    return result.changes;
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function deleteGui(_: IpcMainInvokeEvent, guiId: string): number {
+  try {
+    const result = db.prepare(`
+      DELETE FROM guis WHERE gui_id = ?
+    `).run(guiId);
+
+    return result.changes;
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function getGuis(_: IpcMainInvokeEvent): GUI[] {
+  try {
+    return db.prepare(`SELECT * FROM guis`).all() as GUI[];
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function insertFormControl(_: IpcMainInvokeEvent, control: FormControlNoID): number {
   const { guify_ctrl_choices, ...controlData } = control;
   let changes = 0;
 
@@ -47,7 +82,7 @@ export function insertFormControl(event: IpcMainInvokeEvent, control: FormContro
   }
 }
 
-export function updateFormControl(event: IpcMainInvokeEvent, control: FormControl): number {
+export function updateFormControl(_: IpcMainInvokeEvent, control: FormControl): number {
   const { guify_ctrl_choices, guify_ctrl_id, guify_ctrl_guiName, ...controlData } = control;
   const keys = Object.keys(controlData);
   const values = keys.map(key => key + ' = @' + key).join(', ');
@@ -84,7 +119,7 @@ export function updateFormControl(event: IpcMainInvokeEvent, control: FormContro
   }
 }
 
-export function deleteFormControl(event: IpcMainInvokeEvent, id: string): number {
+export function deleteFormControl(_: IpcMainInvokeEvent, id: string): number {
   try {
     const result = db.prepare(`
       DELETE FROM controls WHERE guify_ctrl_id = ?
@@ -97,15 +132,15 @@ export function deleteFormControl(event: IpcMainInvokeEvent, id: string): number
   }
 }
 
-export function getFormControls(event: IpcMainInvokeEvent, guiName: string): FormControl[] {
+export function getFormControls(_: IpcMainInvokeEvent, guiId: string): FormControl[] {
   try {
     const stmnt = db.prepare(`
     SELECT controls.*, choices.* FROM controls
     LEFT JOIN choices ON controls.guify_ctrl_id = choices.controlId
-    WHERE controls.guify_ctrl_guiName = ?;
+    WHERE controls.gui_id = ?;
   `);
 
-    const result: any[] = stmnt.all(guiName);
+    const result: any[] = stmnt.all(guiId);
 
     if (!result.length) return [];
 

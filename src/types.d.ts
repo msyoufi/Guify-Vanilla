@@ -6,6 +6,15 @@ interface Window {
 };
 
 const channels = {
+  'window:open': '',
+  'window:close': '',
+
+  'gui:insert': '',
+  'gui:delete': '',
+  'gui:get-all': '',
+  'gui:edit': '',
+  'gui:get': '',
+
   'form-control:insert': '',
   'form-control:update': '',
   'form-control:delete': '',
@@ -14,13 +23,18 @@ const channels = {
 
 type GuifyChannel = keyof typeof channels;
 
+interface GUI {
+  gui_id: number,
+  gui_name: string
+}
+
 interface FormControlNoID {
-  guiName: string,
-  name: string,
-  type: string,
-  label: string,
-  required: 0 | 1,
-  choices: FormControlChoice[]
+  guify_ctrl_guiName: string,
+  guify_ctrl_name: string,
+  guify_ctrl_type: string,
+  guify_ctrl_label: string,
+  guify_ctrl_required: '0' | '1',
+  guify_ctrl_choices: FormControlChoice[]
 }
 
 interface FormControlChoice {
@@ -29,5 +43,5 @@ interface FormControlChoice {
 }
 
 interface FormControl extends FormControlNoID {
-  id: number
+  guify_ctrl_id: number
 }

@@ -8,6 +8,12 @@ function onAppReady(): void {
   const mainWindow = createWindow('index');
   mainWindow.on('closed', quitApp);
 
+  ipcMain.handle('window:close', closeFocusedWindow);
+
+  ipcMain.handle('gui:insert', fromsDB.insertGui);
+  ipcMain.handle('gui:delete', fromsDB.deleteGui);
+  ipcMain.handle('gui:get-all', fromsDB.getGuis);
+
   ipcMain.handle('form-control:insert', fromsDB.insertFormControl);
   ipcMain.handle('form-control:update', fromsDB.updateFormControl);
   ipcMain.handle('form-control:delete', fromsDB.deleteFormControl);
@@ -31,6 +37,16 @@ function createWindow(templateName: string): BrowserWindow {
   window.on('ready-to-show', window.show);
 
   return window;
+}
+
+function closeFocusedWindow(): void {
+  BrowserWindow.getFocusedWindow()?.close();
+}
+
+function sendAfterLoad(win: BrowserWindow, channel: string, ...args: any): void {
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send(channel, ...args);
+  });
 }
 
 export function pathTo(path: string): string {
