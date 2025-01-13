@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron';
 import { join as joinPath } from 'node:path';
 import * as fromsDB from './db/scripts/forms-db-manager.js';
 
@@ -13,6 +13,7 @@ function onAppReady(): void {
   ipcMain.handle('gui:insert', fromsDB.insertGui);
   ipcMain.handle('gui:delete', fromsDB.deleteGui);
   ipcMain.handle('gui:get-all', fromsDB.getGuis);
+  ipcMain.handle('gui:edit', openGuiEditor);
 
   ipcMain.handle('form-control:insert', fromsDB.insertFormControl);
   ipcMain.handle('form-control:update', fromsDB.updateFormControl);
@@ -37,6 +38,11 @@ function createWindow(templateName: string): BrowserWindow {
   window.on('ready-to-show', window.show);
 
   return window;
+}
+
+function openGuiEditor(e: IpcMainInvokeEvent, gui: GUI): void {
+  const editorWin = createWindow('gui-editor');
+  sendAfterLoad(editorWin, 'gui:get', gui);
 }
 
 function closeFocusedWindow(): void {

@@ -1,0 +1,44 @@
+#name_input_box {
+  padding: .5rem 0;
+  position: relative;
+  opacity: 0;
+  pointer-events: none;
+  transition: .15s;
+}
+
+#name_input_box.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#name_input_box i {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.gui-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem 1rem;
+  border-radius: var(--radius);
+  transition: .15s;
+  cursor: pointer;
+}
+
+.gui-bar:hover {
+  background-color: var(--blue-secondary);
+}
+
+.gui-bar:active {
+  background-color: var(--blue-primary);
+  color: white;
+}
+
+.gui-bar>span {
+  font-size: 1.1rem;
+}

@@ -1,0 +1,43 @@
+#ctrls_container,
+#ctrl_form {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: white;
+  border-radius: var(--radius);
+}
+
+#ctrl_form {
+  width: 100%;
+  max-width: 700px;
+  row-gap: 1rem;
+}
+
+#ctrl_form .action-buttons {
+  display: flex;
+  column-gap: 1rem;
+}
+
+.control-wrapper:hover {
+  background-color: var(--blue-secondary);
+}
+
+.control-actions {
+  display: none;
+}
+
+.control-wrapper:hover .control-actions {
+  display: block;
+}
+
+#opt_hint {
+  margin-left: 2rem;
+  font-style: italic;
+}
+
+#name_err {
+  margin-left: 2rem;
+  color: var(--red);
+  font-size: .9rem;
+  font-weight: 600;
+}

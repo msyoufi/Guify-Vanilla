@@ -9,11 +9,23 @@
   <script src="../scripts/index.js" type="module" defer></script>
   <link rel="stylesheet" href="../media/bootstrap-icons/bootstrap-icons.css">
   <link rel="stylesheet" href="../styles/styles.css">
+  <link rel="stylesheet" href="../styles/index.css">
   <title>Guify</title>
 </head>
 
 <body>
-  <p>Guify works</p>
+  <div id="main">
+    <button class="guify-button" id="new_gui_btn">Neue Oberfläche +</button>
+
+    <div id="name_input_box">
+      <input type="text" class="guify-input" name="newGuiName" id="name_input" placeholder="Name der Oberfläche">
+      <i class="bi bi-x-circle" id="close_name_btn"></i>
+    </div>
+
+    <div id="guis_container"></div>
+  </div>
+
+  <p id="snack_bar"></p>
 </body>
 
 </html>
