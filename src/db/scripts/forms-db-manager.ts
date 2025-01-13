@@ -20,7 +20,7 @@ function initDB(): void {
 }
 
 export function insertFormControl(event: IpcMainInvokeEvent, control: FormControlNoID): number {
-  const { choices, ...controlData } = control;
+  const { guify_ctrl_choices, ...controlData } = control;
   let changes = 0;
 
   try {
@@ -28,14 +28,14 @@ export function insertFormControl(event: IpcMainInvokeEvent, control: FormContro
       const result = dynamicInsert(db, 'controls', controlData);
       changes = result.changes;
 
-      if (choices.length) {
+      if (guify_ctrl_choices.length) {
         const insertStmnt = db.prepare(`
           INSERT INTO choices (chValue, chLabel, controlId) VALUES (@chValue, @chLabel, @controlId)
         `);
 
         const controlId = result.lastInsertRowid;
 
-        for (const choice of choices)
+        for (const choice of guify_ctrl_choices)
           insertStmnt.run({ controlId, ...choice });
       }
     })();
@@ -48,7 +48,7 @@ export function insertFormControl(event: IpcMainInvokeEvent, control: FormContro
 }
 
 export function updateFormControl(event: IpcMainInvokeEvent, control: FormControl): number {
-  const { choices, id, guiName, ...controlData } = control;
+  const { guify_ctrl_choices, guify_ctrl_id, guify_ctrl_guiName, ...controlData } = control;
   const keys = Object.keys(controlData);
   const values = keys.map(key => key + ' = @' + key).join(', ');
   let changes = 0;
@@ -56,23 +56,23 @@ export function updateFormControl(event: IpcMainInvokeEvent, control: FormContro
   try {
     db.transaction(() => {
       const result = db.prepare(`
-        UPDATE controls SET ${values} WHERE id = ${id}
+        UPDATE controls SET ${values} WHERE guify_ctrl_id = ${guify_ctrl_id}
       `).run(controlData);
 
       changes = result.changes;
 
       if (changes) {
         db.prepare(`
-          DELETE FROM choices WHERE controlId = ${id}
+          DELETE FROM choices WHERE controlId = ${guify_ctrl_id}
         `).run();
 
-        if (choices.length) {
+        if (guify_ctrl_choices.length) {
           const insertStmnt = db.prepare(`
             INSERT INTO choices (chValue, chLabel, controlId) VALUES (@chValue, @chLabel, @controlId)
           `);
 
-          for (const choice of choices)
-            insertStmnt.run({ controlId: id, ...choice });
+          for (const choice of guify_ctrl_choices)
+            insertStmnt.run({ controlId: guify_ctrl_id, ...choice });
         }
       }
     })();
@@ -84,10 +84,10 @@ export function updateFormControl(event: IpcMainInvokeEvent, control: FormContro
   }
 }
 
-export function deleteFormControl(event: IpcMainInvokeEvent, id: number): number {
+export function deleteFormControl(event: IpcMainInvokeEvent, id: string): number {
   try {
     const result = db.prepare(`
-      DELETE FROM controls WHERE id = ?
+      DELETE FROM controls WHERE guify_ctrl_id = ?
     `).run(id);
 
     return result.changes;
@@ -101,8 +101,8 @@ export function getFormControls(event: IpcMainInvokeEvent, guiName: string): For
   try {
     const stmnt = db.prepare(`
     SELECT controls.*, choices.* FROM controls
-    LEFT JOIN choices ON controls.id = choices.controlId
-    WHERE controls.guiName = ?;
+    LEFT JOIN choices ON controls.guify_ctrl_id = choices.controlId
+    WHERE controls.guify_ctrl_guiName = ?;
   `);
 
     const result: any[] = stmnt.all(guiName);
@@ -113,14 +113,14 @@ export function getFormControls(event: IpcMainInvokeEvent, guiName: string): For
 
     for (const ctrl of result) {
       const { chValue, chLabel, controlId, ...ctrlData } = ctrl;
-      const id = ctrl.id;
-      ctrlData.choices = [];
+      const id = ctrl.guify_ctrl_id;
+      ctrlData.guify_ctrl_choices = [];
 
       if (!controls[id])
         controls[id] = ctrlData;
 
       if (controlId)
-        controls[id].choices.push({ chValue, chLabel });
+        controls[id].guify_ctrl_choices.push({ chValue, chLabel });
     }
 
     return Object.values(controls);
