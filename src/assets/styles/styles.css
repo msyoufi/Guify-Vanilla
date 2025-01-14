@@ -7,6 +7,7 @@
   --gray: #d2d2d2;
   --radius: 15px;
   --gap: .3rem;
+  --transition: .15s;
 }
 
 * {
@@ -42,6 +43,7 @@
   outline: none;
   border-radius: var(--radius);
   background-color: transparent;
+  transition: var(--transition);
 }
 
 textarea.guify-input {
@@ -88,7 +90,7 @@ textarea:disabled {
   padding: .25rem 1rem;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: all .1s;
+  transition: var(--transition);
 }
 
 .radio-container>label:hover {
@@ -104,7 +106,7 @@ textarea:disabled {
   background-color: var(--blue-primary);
   color: #fff;
   cursor: pointer;
-  transition: all .1s;
+  transition: var(--transition);
 }
 
 .guify-button:hover {
@@ -132,7 +134,7 @@ textarea:disabled {
   padding: 1rem;
   align-items: center;
   border-radius: var(--radius);
-  transition: .2s;
+  transition: var(--transition);
 }
 
 .form-control {
@@ -209,7 +211,7 @@ i {
   justify-content: center;
   border-radius: 50%;
   font-size: 1.1rem;
-  transition: .15s;
+  transition: var(--transition);
   cursor: pointer;
 }
 

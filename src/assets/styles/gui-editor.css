@@ -23,11 +23,14 @@
 }
 
 .control-actions {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: .15s;
 }
 
 .control-wrapper:hover .control-actions {
-  display: block;
+  opacity: 1;
+  pointer-events: all;
 }
 
 #opt_hint {
