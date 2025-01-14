@@ -14,6 +14,7 @@ function onAppReady(): void {
   ipcMain.handle('gui:delete', fromsDB.deleteGui);
   ipcMain.handle('gui:get-all', fromsDB.getGuis);
   ipcMain.handle('gui:edit', openGuiEditor);
+  ipcMain.handle('gui:use', openGuiForm);
 
   ipcMain.handle('form-control:insert', fromsDB.insertFormControl);
   ipcMain.handle('form-control:update', fromsDB.updateFormControl);
@@ -35,14 +36,21 @@ function createWindow(templateName: string): BrowserWindow {
 
   window.maximize();
   window.loadFile(tempalteFile);
+  window.webContents.openDevTools({ mode: 'right' });
   window.on('ready-to-show', window.show);
 
   return window;
 }
 
 function openGuiEditor(e: IpcMainInvokeEvent, gui: GUI): void {
-  const editorWin = createWindow('gui-editor');
-  sendAfterLoad(editorWin, 'gui:get', gui);
+  const window = createWindow('gui-editor');
+  sendAfterLoad(window, 'gui:data', gui);
+}
+
+function openGuiForm(e: IpcMainInvokeEvent, gui: GUI): void {
+  const window = createWindow('gui-form');
+  const controls = fromsDB.getFormControls(e, gui.gui_id);
+  sendAfterLoad(window, 'gui:data', gui, controls);
 }
 
 function closeFocusedWindow(): void {
