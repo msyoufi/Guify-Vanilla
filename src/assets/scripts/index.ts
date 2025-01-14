@@ -5,6 +5,8 @@ const guisContainer = <HTMLDivElement>get('guis_container');
 const nameInput = <HTMLInputElement>get('name_input');
 const nameInputBox = <HTMLInputElement>get('name_input_box');
 
+window.electron.recieve('gui:data', renderGuis);
+
 renderGuis();
 
 async function renderGuis(): Promise<void> {
@@ -20,19 +22,16 @@ function createGuiElement(gui: GUI): HTMLElement {
 
   const guiBar = create('div', ['gui-bar']);
   const actions = create('div', ['gui-actions']);
-  const edit = create('i', ['bi', 'bi-pencil-square']);
   const del = create('i', ['bi', 'bi-trash-fill']);
 
   listen(guiBar, 'click', onGuiBarClick);
-  listen(edit, 'click', onEditClick);
   listen(del, 'click', onDeleteClick);
 
   guiBar.innerHTML = `<span>${gui.gui_name}</span>`;
   guiBar.dataset.guiId = guiId;
-  edit.dataset.guiId = guiId;
   del.dataset.guiId = guiId;
 
-  actions.append(edit, del);
+  actions.append(del);
   guiBar.appendChild(actions);
 
   return guiBar;
@@ -57,7 +56,7 @@ async function onKeyDown(e: KeyboardEvent): Promise<void> {
     if (e.code === 'Enter') {
       const guiName = nameInput.value;
 
-      if (!guiName) {
+      if (!/^[a-zA-Z_][a-zA-Z0-9_ ]*$/.test(guiName)) {
         showMessage('Ungültiger Name!');
         return;
       }
@@ -71,19 +70,13 @@ async function onKeyDown(e: KeyboardEvent): Promise<void> {
       hideNameBox();
 
   } catch (err: unknown) {
-    showMessage('blabalbla');
+    showMessage('Es ist ein Fehler bei der Erstellung des Projekts aufgetreten');
   }
 }
 
 function onGuiBarClick(e: MouseEvent): void {
   const gui = getGUI(e);
-  window.electron.handle<void>('gui:use', gui);
-}
-
-function onEditClick(e: MouseEvent): void {
-  e.stopPropagation();
-  const gui = getGUI(e);
-  window.electron.handle<void>('gui:edit', gui);
+  window.electron.handle<void>('gui:open', gui);
 }
 
 async function onDeleteClick(e: MouseEvent): Promise<void> {
@@ -92,23 +85,21 @@ async function onDeleteClick(e: MouseEvent): Promise<void> {
   const action = await promptUser(`${gui.gui_name} endgütlig löschen?`, 'Löschen');
 
   if (action === 'confirm')
-    deleteGui(gui.gui_id);
+    deleteGui(gui);
 }
 
-async function deleteGui(guiId: number): Promise<void> {
+async function deleteGui(gui: GUI): Promise<void> {
   try {
-    const changes = await window.electron.handle<number>('gui:delete', guiId);
-
-    if (!changes) throw new Error;
+    await window.electron.handle<void>('gui:delete', gui);
+    showMessage(`Projekt ${gui.gui_name} samt dessen Daten endgütlig gelöscht`);
     renderGuis();
 
   } catch (err: unknown) {
-    showMessage('blabalbla');
+    showMessage('Es ist ein Fehler bei der Löschung aufgetreten');
   }
 }
 
 function getGUI(e: MouseEvent): GUI {
   const gui_id = Number((<HTMLElement>e.currentTarget).dataset.guiId);
-  const gui_name = guisCach.find(g => g.gui_id === gui_id)?.gui_name as string;
-  return { gui_id, gui_name };
+  return guisCach.find(g => g.gui_id === gui_id) as GUI;
 }

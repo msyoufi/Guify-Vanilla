@@ -14,9 +14,12 @@
 </head>
 
 <body>
-  <p id="gui_name"></p>
+  <p id="title"></p>
 
-  <button id="new_ctrl_btn" class="guify-button">New Frage Hinzufügen</button>
+  <div class="buttons-contaienr">
+    <button id="new_ctrl_btn" class="guify-button">New Frage Hinzufügen</button>
+    <button id="production_btn" class="guify-button red-button">Zu Produktion Wechseln</button>
+  </div>
 
   <div id="ctrls_container"></div>
 
@@ -83,6 +86,10 @@
   </div>
 
   <p id="snack_bar"></p>
+
+  <div class="overlay" id="guify_locker_overlay">
+    <p>Dieses Projekt is im Produktionsmodus und kann nicht mehr geänder werden</p>
+  </div>
 
 </body>
 

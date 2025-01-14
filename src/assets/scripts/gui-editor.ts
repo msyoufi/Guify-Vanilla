@@ -2,21 +2,23 @@ import { get, getFormValues, listen, create, promptUser, showMessage } from "./u
 import { createControlElement } from './control-renderer.js';
 import { IpcMainInvokeEvent } from "electron";
 
-let guiId: number;
+let GUI: GUI;
 let controlsCach: FormControl[] = [];
 const typesWithChoices = ['select', 'radio', 'checkbox'];
 
-const guiName = <HTMLParagraphElement>get('gui_name');
+const productionBtn = <HTMLButtonElement>get('production_btn');
 const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
 
 window.electron.recieve('gui:data', (e: IpcMainInvokeEvent, gui: GUI) => {
-  guiId = gui.gui_id;
-  guiName.innerText = gui.gui_name;
+  GUI = gui;
   renderControls();
+  setPageTitle();
 });
 
 async function renderControls(): Promise<void> {
-  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', guiId);
+  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', GUI.gui_id);
+
+  productionBtn.disabled = controlsCach.length ? false : true;
   ctrlsContainer.innerHTML = '';
 
   for (const ctrl of controlsCach) {
@@ -47,6 +49,13 @@ function createActionButtons(ctrlId: number): HTMLElement {
   return container;
 }
 
+function setPageTitle(): void {
+  (get('title') as HTMLParagraphElement).innerHTML = `
+    <span>${GUI.gui_name}</span>
+    <span>Entwicklungsmodus</span>
+  `;
+}
+
 // Control form logic
 
 const ctrlOverlay = <HTMLDivElement>get('ctrl_form_overlay');
@@ -61,6 +70,7 @@ listen(ctrlForm, 'submit', onCtrlSubmit);
 listen(ctrlForm, 'input', onCtrlFormInput);
 listen(ctrlForm, 'reset', closeCtrlForm);
 listen(nameInput, 'input', checkValidName);
+listen('production_btn', 'click', onProductionClick);
 listen('new_ctrl_btn', 'click', openCtrlForm);
 
 async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
@@ -84,7 +94,7 @@ async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
 
 function cleanFormData(): FormControl | NewFormControl | null {
   const { guify_ctrl_choices, ...control } = getFormValues(ctrlForm);
-  control.gui_id = guiId;
+  control.gui_id = GUI.gui_id;
 
   if (guify_ctrl_choices) {
     const cleanedChoices = cleanChoices(guify_ctrl_choices);
@@ -254,4 +264,26 @@ async function deleteControl(id: string): Promise<void> {
   } catch (err: unknown) {
     showMessage('Es is ein Fehler beim Entfernen aufgetreten!');
   }
+}
+
+async function onProductionClick(): Promise<void> {
+  const action = await promptUser('In den Productionsmodus wechseln?', 'Bestätigen');
+
+  if (action === 'confirm')
+    makeProduction();
+}
+
+async function makeProduction(): Promise<void> {
+  try {
+    await window.electron.handle<number>('gui:production', GUI, controlsCach);
+    lockView();
+
+  } catch (err: unknown) {
+    showMessage('Es is ein Fehler beim Wechseln in den Produktionsmodus aufgetreten!');
+  }
+}
+
+function lockView(): void {
+  const locker = <HTMLDivElement>get('guify_locker_overlay');
+  locker.style.display = 'flex';
 }

@@ -22,7 +22,7 @@ function initDB(): void {
 export function insertGui(_: IpcMainInvokeEvent, guiName: string): number {
   try {
     const result = db.prepare(`
-      INSERT INTO guis (gui_name) VALUES (?)
+      INSERT INTO guis (gui_name, production) VALUES (?, 0)
     `).run(guiName);
 
     return result.changes;
@@ -32,7 +32,7 @@ export function insertGui(_: IpcMainInvokeEvent, guiName: string): number {
   }
 }
 
-export function deleteGui(_: IpcMainInvokeEvent, guiId: string): number {
+export function deleteGui(guiId: number): number {
   try {
     const result = db.prepare(`
       DELETE FROM guis WHERE gui_id = ?
@@ -49,6 +49,18 @@ export function getGuis(_: IpcMainInvokeEvent): GUI[] {
   try {
     return db.prepare(`SELECT * FROM guis`).all() as GUI[];
 
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function updateGui(_: IpcMainInvokeEvent, gui_id: number, column: string, value: any): number {
+  try {
+    const result = db.prepare(`
+      UPDATE guis SET ${column} = @value WHERE gui_id = @gui_id
+    `).run({ value, gui_id });
+
+    return result.changes;
   } catch (err: unknown) {
     throw err;
   }

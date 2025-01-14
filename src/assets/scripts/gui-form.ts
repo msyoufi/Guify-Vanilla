@@ -6,9 +6,10 @@ let GUI: GUI;
 const entryForm = <HTMLFormElement>get('entry_form');
 const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
 
-window.electron.recieve('gui:data', (e: IpcMainInvokeEvent, gui: GUI, controls: FormControl[]) => {
-  renderControls(controls);
+window.electron.recieve('gui:data', async (e: IpcMainInvokeEvent, gui: GUI) => {
   GUI = gui;
+  const controls = await window.electron.handle<FormControl[]>('form-control:get-all', gui.gui_id);
+  renderControls(controls);
 });
 
 async function renderControls(controls: FormControl[]): Promise<void> {
