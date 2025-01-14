@@ -3,7 +3,7 @@
   position: relative;
   opacity: 0;
   pointer-events: none;
-  transition: .15s;
+  transition: var(--transition);
 }
 
 #name_input_box.show {
@@ -26,7 +26,7 @@
   justify-content: space-between;
   padding: .5rem 1rem;
   border-radius: var(--radius);
-  transition: .15s;
+  transition: var(--transition);
   cursor: pointer;
 }
 
