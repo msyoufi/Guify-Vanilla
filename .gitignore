@@ -1,4 +1,4 @@
 node_modules
 src/**/*.js
 dist
-src/db/*.db
+src/db/*.db*
