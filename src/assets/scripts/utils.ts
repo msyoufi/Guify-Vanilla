@@ -42,7 +42,7 @@ export function showMessage(message: string, color: 'red' | 'green' = 'red', del
   messageTimer = setTimeout(() => snackBar.style.display = 'none', delay);
 }
 
-export function promptUser(message: string, action: string): Promise<string> {
+export function promptUser(message: string, action: string): Promise<'confirm' | 'cancle'> {
   const overlay = create('div', ['overlay']);
   const box = create('div', ['dialog-container']);
   const p = create('p', [], message);
@@ -54,8 +54,8 @@ export function promptUser(message: string, action: string): Promise<string> {
   document.body.append(overlay);
   overlay.style.display = 'flex';
 
-  return new Promise<string>(resolve => {
-    function response(action: string): void {
+  return new Promise(resolve => {
+    function response(action: 'confirm' | 'cancle'): void {
       document.body.removeChild(overlay);
       resolve(action);
     };
