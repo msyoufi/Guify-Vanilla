@@ -16,15 +16,15 @@ export function create(tag: string, classes?: string[], text?: string): HTMLElem
   return el;
 }
 
-export function getFormValues(form: HTMLFormElement | string): Record<string, string> {
+export function getFormValues(form: HTMLFormElement | string): any {
   if (typeof form === 'string')
     form = get(form) as HTMLFormElement;
 
   const formData = new FormData(form).entries();
-  const data: Record<string, string> = {};
+  const data: any = {};
 
   for (const [key, value] of formData)
-    data[key] = value as string;
+    data[key] = value;
 
   return data;
 }
