@@ -2,20 +2,21 @@ import { get, getFormValues, listen, create, promptUser, showMessage } from "./u
 import { createControlElement } from './control-renderer.js';
 import { IpcMainInvokeEvent } from "electron";
 
-let GUI: GUI;
+let guiId: number;
 let controlsCach: FormControl[] = [];
 const typesWithChoices = ['select', 'radio', 'checkbox'];
-const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
-const guiName = <HTMLParagraphElement>get('gui_name');
 
-window.electron.recieve('gui:get', (e: IpcMainInvokeEvent, gui: GUI) => {
-  GUI = gui;
+const guiName = <HTMLParagraphElement>get('gui_name');
+const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
+
+window.electron.recieve('gui:data', (e: IpcMainInvokeEvent, gui: GUI) => {
+  guiId = gui.gui_id;
   guiName.innerText = gui.gui_name;
   renderControls();
 });
 
 async function renderControls(): Promise<void> {
-  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', GUI.gui_id);
+  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', guiId);
   ctrlsContainer.innerHTML = '';
 
   for (const ctrl of controlsCach) {
@@ -30,6 +31,7 @@ function createActionButtons(ctrlId: number): HTMLElement {
   const container = create('div', ['control-actions']);
   const del = create('i', ['bi', 'bi-trash-fill']);
   const edit = create('i', ['bi', 'bi-pencil-square']);
+  const id = ctrlId.toString();
 
   listen(del, 'click', onDeleteClick);
   listen(edit, 'click', e => {
@@ -38,8 +40,8 @@ function createActionButtons(ctrlId: number): HTMLElement {
     toggleChoices();
   });
 
-  del.dataset.id = ctrlId.toString();
-  edit.dataset.id = ctrlId.toString();
+  del.dataset.id = id;
+  edit.dataset.id = id;
 
   container.append(edit, del);
   return container;
@@ -59,33 +61,18 @@ listen(ctrlForm, 'submit', onCtrlSubmit);
 listen(ctrlForm, 'input', onCtrlFormInput);
 listen(ctrlForm, 'reset', closeCtrlForm);
 listen(nameInput, 'input', checkValidName);
-listen('ctrl_new_btn', 'click', () => {
-  submitBtn.value = 'Hinzufügen';
-  openCtrlForm();
-});
+listen('new_ctrl_btn', 'click', openCtrlForm);
 
 async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
   try {
     event.preventDefault();
+    const control = cleanFormData();
+    if (!control) return;
 
-    const { guify_ctrl_choices, ...control } = getFormValues('ctrl_form');
-    control.gui_id = GUI.gui_id;
-
-    if (guify_ctrl_choices) {
-      const cleanChoices = getCleanChoices(guify_ctrl_choices);
-      if (!cleanChoices.length) return;
-      control.guify_ctrl_choices = cleanChoices;
-
-    } else
-      control.guify_ctrl_choices = [];
-
-    if (submitBtn.value === 'Hinzufügen') {
-      delete control.guify_ctrl_id;
-      await insertControl(control);
-
-    } else {
+    if ('guify_ctrl_id' in control)
       await updateControl(control);
-    }
+    else
+      await insertControl(control);
 
     renderControls();
     closeCtrlForm();
@@ -95,9 +82,29 @@ async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
   }
 }
 
-function getCleanChoices(choicesString: string): FormControlChoice[] {
-  const counter: any = {};
-  const cleanChoices: FormControlChoice[] = [];
+function cleanFormData(): FormControl | NewFormControl | null {
+  const { guify_ctrl_choices, ...control } = getFormValues(ctrlForm);
+  control.gui_id = guiId;
+
+  if (guify_ctrl_choices) {
+    const cleanedChoices = cleanChoices(guify_ctrl_choices);
+    if (!cleanedChoices) return null;
+
+    control.guify_ctrl_choices = cleanedChoices;
+
+  } else {
+    control.guify_ctrl_choices = [];
+  }
+
+  if (!control.guify_ctrl_id.length)
+    delete control.guify_ctrl_id;
+
+  return control;
+}
+
+function cleanChoices(choicesString: string): FormControlChoice[] | null {
+  const counter: Record<string, number> = {};
+  const cleanedChoices: FormControlChoice[] = [];
   const choices = choicesString.split('\n');
 
   for (const choice of choices) {
@@ -105,29 +112,29 @@ function getCleanChoices(choicesString: string): FormControlChoice[] {
 
     if (!/^\s*[^=\s]+(?:\s[^=\s]*)?\s*=\s*[^=\s]+(?:\s[^=\s]*)?\s*$/.test(choice)) {
       showMessage(`Option ${choice} nicht korrekt formatiert!`);
-      return [];
+      return null;
     }
 
     const ch = choice.split('=');
     const val = ch[0].trim();
     counter[val] = (counter[val] ?? 0) + 1;
 
-    cleanChoices.push({
-      chValue: val,
-      chLabel: ch[1].trim()
+    cleanedChoices.push({
+      ch_value: val,
+      ch_label: ch[1].trim()
     });
   }
 
   for (const [key, val] of Object.entries(counter))
     if (val !== 1) {
       showMessage(`Die Werte der Optionen müssen unterschiedlich sein.\nWert: ${key} ist ${val} Fach vorhanden!`, 'red', 4000);
-      return [];
+      return null;
     }
 
-  return cleanChoices;
+  return cleanedChoices;
 }
 
-async function insertControl(control: FormControl): Promise<void> {
+async function insertControl(control: NewFormControl): Promise<void> {
   const changes = await window.electron.handle<number>('form-control:insert', control);
   if (!changes) throw new Error();
   showMessage('Frage erfolgreich hinzugefügt', 'green');
@@ -159,7 +166,6 @@ function populateCtrlForm(event: MouseEvent): void {
   const control = controlsCach.find(ctrl => ctrl.guify_ctrl_id == id);
   if (!control) return;
 
-  submitBtn.value = 'Speichern';
   const inputs = ctrlForm.querySelectorAll<HTMLInputElement>('input, select, textarea');
 
   for (const input of inputs) {
@@ -173,7 +179,7 @@ function populateCtrlForm(event: MouseEvent): void {
 
     else if (key === 'guify_ctrl_choices')
       //@ts-ignore
-      input.value = value.map(ch => `${ch.chValue} = ${ch.chLabel}`).join('\n');
+      input.value = value.map(c => `${c.ch_value} = ${c.ch_label}`).join('\n');
 
     else
       //@ts-ignore
@@ -218,16 +224,20 @@ function checkValidName(): void {
 function checkNameExists(name: string): boolean {
   const id = idInput.value;
 
-  for (const ctrl of controlsCach)
-    if (ctrl.guify_ctrl_name === name && (ctrl.guify_ctrl_id.toString() !== id || !id))
+  for (const ctrl of controlsCach) {
+    if (
+      ctrl.guify_ctrl_name === name
+      && (!id || ctrl.guify_ctrl_id.toString() !== id)
+    )
       return true;
+  }
 
   return false;
 }
 
 async function onDeleteClick(event: MouseEvent): Promise<void> {
   const id = (event.currentTarget as HTMLElement).dataset.id as string;
-  const action = await promptUser('Diese Frage endgueltig entfernen?', 'Entfernen');
+  const action = await promptUser('Diese Frage endgültig entfernen?', 'Entfernen');
 
   if (action === 'confirm')
     deleteControl(id);

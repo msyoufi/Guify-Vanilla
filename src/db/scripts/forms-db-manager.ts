@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3';
+import fs from 'node:fs';
 import { IpcMainInvokeEvent } from 'electron';
 import { pathTo } from '../../main.js';
 import { dynamicInsert } from './db-utils.js';
-import fs from 'node:fs';
 
 export const db = new Database(pathTo('db/forms.db'));
 db.pragma('journal_mode = WAL');
@@ -54,7 +54,7 @@ export function getGuis(_: IpcMainInvokeEvent): GUI[] {
   }
 }
 
-export function insertFormControl(_: IpcMainInvokeEvent, control: FormControlNoID): number {
+export function insertFormControl(_: IpcMainInvokeEvent, control: NewFormControl): number {
   const { guify_ctrl_choices, ...controlData } = control;
   let changes = 0;
 
@@ -65,13 +65,13 @@ export function insertFormControl(_: IpcMainInvokeEvent, control: FormControlNoI
 
       if (guify_ctrl_choices.length) {
         const insertStmnt = db.prepare(`
-          INSERT INTO choices (chValue, chLabel, controlId) VALUES (@chValue, @chLabel, @controlId)
+          INSERT INTO choices (ch_value, ch_label, control_id) VALUES (@ch_value, @ch_label, @control_id)
         `);
 
-        const controlId = result.lastInsertRowid;
+        const control_id = result.lastInsertRowid;
 
         for (const choice of guify_ctrl_choices)
-          insertStmnt.run({ controlId, ...choice });
+          insertStmnt.run({ control_id, ...choice });
       }
     })();
 
@@ -83,7 +83,7 @@ export function insertFormControl(_: IpcMainInvokeEvent, control: FormControlNoI
 }
 
 export function updateFormControl(_: IpcMainInvokeEvent, control: FormControl): number {
-  const { guify_ctrl_choices, guify_ctrl_id, guify_ctrl_guiName, ...controlData } = control;
+  const { guify_ctrl_choices, guify_ctrl_id, gui_id, ...controlData } = control;
   const keys = Object.keys(controlData);
   const values = keys.map(key => key + ' = @' + key).join(', ');
   let changes = 0;
@@ -98,16 +98,16 @@ export function updateFormControl(_: IpcMainInvokeEvent, control: FormControl): 
 
       if (changes) {
         db.prepare(`
-          DELETE FROM choices WHERE controlId = ${guify_ctrl_id}
+          DELETE FROM choices WHERE control_id = ${guify_ctrl_id}
         `).run();
 
         if (guify_ctrl_choices.length) {
           const insertStmnt = db.prepare(`
-            INSERT INTO choices (chValue, chLabel, controlId) VALUES (@chValue, @chLabel, @controlId)
+            INSERT INTO choices (ch_value, ch_label, control_id) VALUES (@ch_value, @ch_label, @control_id)
           `);
 
           for (const choice of guify_ctrl_choices)
-            insertStmnt.run({ controlId: guify_ctrl_id, ...choice });
+            insertStmnt.run({ control_id: guify_ctrl_id, ...choice });
         }
       }
     })();
@@ -132,11 +132,11 @@ export function deleteFormControl(_: IpcMainInvokeEvent, id: string): number {
   }
 }
 
-export function getFormControls(_: IpcMainInvokeEvent, guiId: string): FormControl[] {
+export function getFormControls(_: IpcMainInvokeEvent, guiId: number): FormControl[] {
   try {
     const stmnt = db.prepare(`
     SELECT controls.*, choices.* FROM controls
-    LEFT JOIN choices ON controls.guify_ctrl_id = choices.controlId
+    LEFT JOIN choices ON controls.guify_ctrl_id = choices.control_id
     WHERE controls.gui_id = ?;
   `);
 
@@ -144,18 +144,18 @@ export function getFormControls(_: IpcMainInvokeEvent, guiId: string): FormContr
 
     if (!result.length) return [];
 
-    const controls: { [key: number]: FormControl } = {};
+    const controls: Record<number, FormControl> = {};
 
     for (const ctrl of result) {
-      const { chValue, chLabel, controlId, ...ctrlData } = ctrl;
+      const { ch_label, ch_value, control_id, ...ctrlData } = ctrl;
       const id = ctrl.guify_ctrl_id;
       ctrlData.guify_ctrl_choices = [];
 
       if (!controls[id])
         controls[id] = ctrlData;
 
-      if (controlId)
-        controls[id].guify_ctrl_choices.push({ chValue, chLabel });
+      if (control_id)
+        controls[id].guify_ctrl_choices.push({ ch_value, ch_label });
     }
 
     return Object.values(controls);

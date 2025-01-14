@@ -13,7 +13,8 @@ const channels = {
   'gui:delete': '',
   'gui:get-all': '',
   'gui:edit': '',
-  'gui:get': '',
+  'gui:use': '',
+  'gui:data': '',
 
   'form-control:insert': '',
   'form-control:update': '',
@@ -28,8 +29,8 @@ interface GUI {
   gui_name: string
 }
 
-interface FormControlNoID {
-  guify_ctrl_guiName: string,
+interface NewFormControl {
+  gui_id: number,
   guify_ctrl_name: string,
   guify_ctrl_type: string,
   guify_ctrl_label: string,
@@ -37,11 +38,11 @@ interface FormControlNoID {
   guify_ctrl_choices: FormControlChoice[]
 }
 
-interface FormControlChoice {
-  chValue: string,
-  chLabel: string
+interface FormControl extends NewFormControl {
+  guify_ctrl_id: number
 }
 
-interface FormControl extends FormControlNoID {
-  guify_ctrl_id: number
+interface FormControlChoice {
+  ch_value: string,
+  ch_label: string
 }

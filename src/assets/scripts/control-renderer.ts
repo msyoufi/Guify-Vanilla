@@ -46,7 +46,7 @@ function createSelectInput(ctrl: FormControl): string {
     <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}${ctrl.guify_ctrl_required ? ' *' : ''}</label>
     <select class="guify-input" id="${ctrl.guify_ctrl_name}" name="${ctrl.guify_ctrl_name}">
       <option value="" hidden selected disabled></option>
-      ${ctrl.guify_ctrl_choices.map(choice => `<option value="${choice.chValue}">${choice.chLabel}</option>`).join('')}
+      ${ctrl.guify_ctrl_choices.map(choice => `<option value="${choice.ch_value}">${choice.ch_label}</option>`).join('')}
     </select>
   `;
 }
@@ -58,8 +58,8 @@ function createMcInput(ctrl: FormControl): string {
       ${ctrl.guify_ctrl_choices.map(choice => {
     return `
       <div class="radio-container">
-        <input type="${ctrl.guify_ctrl_type}" name="${ctrl.guify_ctrl_name}" value="${choice.chValue}" id="${ctrl.guify_ctrl_name}_${choice.chValue}">
-        <label for="${ctrl.guify_ctrl_name}_${choice.chValue}">${choice.chLabel}</label>
+        <input type="${ctrl.guify_ctrl_type}" name="${ctrl.guify_ctrl_name}" value="${choice.ch_value}" id="${ctrl.guify_ctrl_name}_${choice.ch_value}">
+        <label for="${ctrl.guify_ctrl_name}_${choice.ch_value}">${choice.ch_label}</label>
       </div>
     `}).join('')}
     </div>

@@ -16,17 +16,21 @@ async function renderGuis(): Promise<void> {
 }
 
 function createGuiElement(gui: GUI): HTMLElement {
+  const guiId = gui.gui_id.toString();
+
   const guiBar = create('div', ['gui-bar']);
   const actions = create('div', ['gui-actions']);
   const edit = create('i', ['bi', 'bi-pencil-square']);
   const del = create('i', ['bi', 'bi-trash-fill']);
 
-  listen(guiBar, 'click', onUseClick);
+  listen(guiBar, 'click', onGuiBarClick);
   listen(edit, 'click', onEditClick);
   listen(del, 'click', onDeleteClick);
 
   guiBar.innerHTML = `<span>${gui.gui_name}</span>`;
-  guiBar.dataset.guiId = gui.gui_id.toString();
+  guiBar.dataset.guiId = guiId;
+  edit.dataset.guiId = guiId;
+  del.dataset.guiId = guiId;
 
   actions.append(edit, del);
   guiBar.appendChild(actions);
@@ -71,29 +75,27 @@ async function onKeyDown(e: KeyboardEvent): Promise<void> {
   }
 }
 
-function onUseClick(e: MouseEvent): void {
-  const guiId = (e.currentTarget as HTMLElement).dataset.guiId;
-  console.log(guiId)
+function onGuiBarClick(e: MouseEvent): void {
+  const gui = getGUI(e);
+  window.electron.handle<void>('gui:use', gui);
 }
 
 function onEditClick(e: MouseEvent): void {
   e.stopPropagation();
-  const gui_id = getGuiId(e);
-  const gui_name = guisCach.find(g => g.gui_id.toString() === gui_id)?.gui_name;
-  window.electron.handle<void>('gui:edit', { gui_id, gui_name });
+  const gui = getGUI(e);
+  window.electron.handle<void>('gui:edit', gui);
 }
 
 async function onDeleteClick(e: MouseEvent): Promise<void> {
   e.stopPropagation();
-  const guiId = getGuiId(e);
-  const guiName = guisCach.find(g => g.gui_id.toString() === guiId)?.gui_name;
-  const action = await promptUser(`${guiName} endgütlig löschen?`, 'Löschen');
+  const gui = getGUI(e);
+  const action = await promptUser(`${gui.gui_name} endgütlig löschen?`, 'Löschen');
 
   if (action === 'confirm')
-    deleteGui(guiId);
+    deleteGui(gui.gui_id);
 }
 
-async function deleteGui(guiId: string): Promise<void> {
+async function deleteGui(guiId: number): Promise<void> {
   try {
     const changes = await window.electron.handle<number>('gui:delete', guiId);
 
@@ -105,7 +107,8 @@ async function deleteGui(guiId: string): Promise<void> {
   }
 }
 
-function getGuiId(e: MouseEvent): string {
-  return (e.currentTarget as HTMLElement)
-    .parentElement?.parentElement?.dataset.guiId as string;
+function getGUI(e: MouseEvent): GUI {
+  const gui_id = Number((<HTMLElement>e.currentTarget).dataset.guiId);
+  const gui_name = guisCach.find(g => g.gui_id === gui_id)?.gui_name as string;
+  return { gui_id, gui_name };
 }

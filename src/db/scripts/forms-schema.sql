@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS 'controls' (
 );
 
 CREATE TABLE IF NOT EXISTS 'choices' (
-    controlId INTEGER NOT NULL,
-    chValue TEXT NOT NULL,
-    chLabel TEXT NOT NULL,
-    FOREIGN KEY (controlId) REFERENCES controls(guify_ctrl_id) ON DELETE CASCADE
+    control_id INTEGER NOT NULL,
+    ch_value TEXT NOT NULL,
+    ch_label TEXT NOT NULL,
+    FOREIGN KEY (control_id) REFERENCES controls(guify_ctrl_id) ON DELETE CASCADE
 );
