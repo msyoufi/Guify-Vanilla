@@ -2,48 +2,47 @@ import { create } from "./utils.js";
 
 export function createControlElement(control: FormControl): HTMLElement {
   const wrapper = create('div', ['control-wrapper']);
-  const container = create('div', ['form-control']);
-  const placeholder = create('div');
+  const ctrlBox = create('div', ['form-control']);
 
   switch (control.guify_ctrl_type) {
     case 'text':
     case 'number':
     case 'date':
     case 'time':
-      container.innerHTML = createTextInput(control);
+      ctrlBox.innerHTML = createTextInput(control);
       break;
     case 'textArea':
-      container.innerHTML = createTextArea(control);
+      ctrlBox.innerHTML = createTextArea(control);
       break;
     case 'select':
-      container.innerHTML = createSelectInput(control);
+      ctrlBox.innerHTML = createSelectInput(control);
       break;
     case 'checkbox':
     case 'radio':
-      container.innerHTML = createMcInput(control);
+      ctrlBox.innerHTML = createMcInput(control);
   }
 
-  wrapper.append(placeholder, container);
+  wrapper.append(ctrlBox);
   return wrapper;
 }
 
 function createTextInput(ctrl: FormControl): string {
   return `
-    <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}${ctrl.guify_ctrl_required ? ' *' : ''}</label>
+    ${createLabel(ctrl)}
     <input type="${ctrl.guify_ctrl_type}" class="guify-input" id="${ctrl.guify_ctrl_name}" name="${ctrl.guify_ctrl_name}">
   `;
 }
 
 function createTextArea(ctrl: FormControl): string {
   return `
-    <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}${ctrl.guify_ctrl_required ? ' *' : ''}</label>
+    ${createLabel(ctrl)}
     <textarea class="guify-input" id="${ctrl.guify_ctrl_name}" name="${ctrl.guify_ctrl_name}"></textarea>
   `;
 }
 
 function createSelectInput(ctrl: FormControl): string {
   return `
-    <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}${ctrl.guify_ctrl_required ? ' *' : ''}</label>
+    ${createLabel(ctrl)}
     <select class="guify-input" id="${ctrl.guify_ctrl_name}" name="${ctrl.guify_ctrl_name}">
       <option value="" hidden selected disabled></option>
       ${ctrl.guify_ctrl_choices.map(choice => `<option value="${choice.ch_value}">${choice.ch_label}</option>`).join('')}
@@ -53,7 +52,7 @@ function createSelectInput(ctrl: FormControl): string {
 
 function createMcInput(ctrl: FormControl): string {
   return `
-    <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}${ctrl.guify_ctrl_required ? ' *' : ''}</label>
+    ${createLabel(ctrl)}
     <div class="radios-wrapper">
       ${ctrl.guify_ctrl_choices.map(choice => {
     return `
@@ -65,3 +64,13 @@ function createMcInput(ctrl: FormControl): string {
     </div>
   `;
 }
+
+function createLabel(ctrl: FormControl): string {
+  return `
+    <div class="tool-bar">
+      <span class="var-name">Feldname:${ctrl.guify_ctrl_name}${ctrl.guify_ctrl_required ? '*' : ''}</span>
+    </div>
+    <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}</label>
+  `;
+}
+

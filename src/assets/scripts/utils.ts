@@ -12,7 +12,7 @@ export function listen(element: string | HTMLElement, event: string, callback: (
 export function create(tag: string, classes?: string[], text?: string): HTMLElement {
   const el = document.createElement(tag);
   if (classes) el.classList.add(...classes);
-  if (text) el.textContent = text;
+  if (text) el.innerText = text;
   return el;
 }
 

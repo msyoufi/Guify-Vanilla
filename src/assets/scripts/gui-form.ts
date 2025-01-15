@@ -3,13 +3,15 @@ import { createControlElement } from "./control-renderer.js";
 import { create, get, getFormValues, listen, showMessage } from "./utils.js";
 
 let GUI: GUI;
-const entryForm = <HTMLFormElement>get('entry_form');
 const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
+
+// Render logic
 
 window.electron.recieve('gui:data', async (e: IpcMainInvokeEvent, gui: GUI) => {
   GUI = gui;
   const controls = await window.electron.handle<FormControl[]>('form-control:get-all', gui.gui_id);
   renderControls(controls);
+  (get('title') as HTMLParagraphElement).innerText = GUI.gui_name;
 });
 
 async function renderControls(controls: FormControl[]): Promise<void> {
@@ -17,20 +19,20 @@ async function renderControls(controls: FormControl[]): Promise<void> {
 
   for (const ctrl of controls) {
     const ctrlNode = createControlElement(ctrl);
-    const actions = createActionButtons(ctrl.guify_ctrl_name)
-    ctrlNode.appendChild(actions);
+    const actions = createActionButtons(ctrl.guify_ctrl_name);
+    (ctrlNode.querySelector('.tool-bar') as HTMLDivElement).prepend(actions);
     ctrlsContainer.appendChild(ctrlNode);
   }
 }
 
 function createActionButtons(ctrlName: string): HTMLElement {
-  const container = create('div', ['control-actions']);
+  const container = create('div', ['actions']);
   const reset = create('i', ['bi', 'bi-arrow-counterclockwise']);
 
-  reset.dataset.name = ctrlName;
   listen(reset, 'click', onResetCtrlClick);
-  container.append(reset);
+  reset.dataset.name = ctrlName;
 
+  container.append(reset);
   return container;
 }
 
@@ -39,7 +41,14 @@ function onResetCtrlClick(e: MouseEvent): void {
   console.log(ctrlName);
 }
 
+
+// Form logic
+
+const entryForm = <HTMLFormElement>get('entry_form');
+const submitBtn = <HTMLButtonElement>entryForm.querySelector('input[type="submit"]');
+
 listen(entryForm, 'submit', onFormSubmit);
+listen(entryForm, 'input', onFormInput);
 
 async function onFormSubmit(event: SubmitEvent): Promise<void> {
   try {
@@ -53,4 +62,8 @@ async function onFormSubmit(event: SubmitEvent): Promise<void> {
     console.log(err);
     showMessage('Es ist ein Fehler bei der Speicherung aufgetreten!');
   }
+}
+
+function onFormInput(): void {
+  submitBtn.disabled = entryForm.checkValidity() ? false : true;
 }

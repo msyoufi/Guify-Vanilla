@@ -14,14 +14,30 @@
 </head>
 
 <body>
-  <p id="title"></p>
+  <p class="title-box">
+    <span id="title"></span>
+    <span>Entwicklungsmodus</span>
+  </p>
 
-  <div class="buttons-contaienr">
-    <button id="new_ctrl_btn" class="guify-button">New Frage Hinzufügen</button>
-    <button id="production_btn" class="guify-button red-button">Zu Produktion Wechseln</button>
-  </div>
+  <button id="new_ctrl_btn" class="guify-button">
+    New Frage
+    <i class="bi bi-plus-square"></i>
+  </button>
 
   <div id="ctrls_container"></div>
+
+  <div class="production-box">
+    <p>
+      Das Projekt befindet sich noch im Entwicklungsmodus. Hier können Sie die Fragen bearbeiten. Wechseln Sie
+      in den Produktionsmodus, um mit der Datenakquise zu beginnen. Danach können Sie die
+      Fragen nicht mehr bearbeiten. Dieser Schritt kann nicht rückgängig gemacht werden.
+    </p>
+
+    <button id="production_btn" class="guify-button red-button">
+      Zum Produktionsmodus Wechseln
+      <i class="bi bi-arrow-repeat"></i>
+    </button>
+  </div>
 
   <div class="overlay" id="ctrl_form_overlay">
     <form id="ctrl_form">
@@ -44,7 +60,7 @@
 
       <div class="form-control">
         <label for="guify_ctrl_name">
-          Variablenname
+          Feldname
           <small id="name_err"></small>
         </label>
         <input type="text" class="guify-input" name="guify_ctrl_name" id="guify_ctrl_name" maxlength="20" required>
@@ -63,9 +79,9 @@
         <textarea class="guify-input" name="guify_ctrl_choices" id="guify_ctrl_choices" disabled></textarea>
       </div>
 
-      <div class="inline-form-control">
+      <div class="form-control inline-control">
         <label>Pflichtfeld</label>
-        <div>
+        <div class="radios-wrapper inline-radios">
           <div class="radio-container">
             <input type="radio" name="guify_ctrl_required" id="guify_ctrl_required_1" value="1" required>
             <label for="guify_ctrl_required_1">Ja</label>
@@ -77,7 +93,7 @@
         </div>
       </div>
 
-      <div class="action-buttons">
+      <div class="form-buttons">
         <input type="submit" class="guify-button" value="Speichern" disabled>
         <input type="reset" class="guify-button red-button" value="Abbrechen">
       </div>
@@ -88,7 +104,11 @@
   <p id="snack_bar"></p>
 
   <div class="overlay" id="guify_locker_overlay">
-    <p>Dieses Projekt is im Produktionsmodus und kann nicht mehr geänder werden</p>
+    <p>
+      Das Projekt is nun im Produktionsmodus und kann nicht mehr modifiziert werden.<br>
+      Bitte schließen Sie dieses Fenster und rufen das Projekt wieder auf, um mit der Datenakquise zu
+      beginnen.
+    </p>
   </div>
 
 </body>

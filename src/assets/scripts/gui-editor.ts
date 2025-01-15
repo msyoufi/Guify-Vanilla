@@ -12,7 +12,7 @@ const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
 window.electron.recieve('gui:data', (e: IpcMainInvokeEvent, gui: GUI) => {
   GUI = gui;
   renderControls();
-  setPageTitle();
+  (get('title') as HTMLParagraphElement).innerText = GUI.gui_name;
 });
 
 async function renderControls(): Promise<void> {
@@ -23,14 +23,14 @@ async function renderControls(): Promise<void> {
 
   for (const ctrl of controlsCach) {
     const ctrlNode = createControlElement(ctrl);
-    const actions = createActionButtons(ctrl.guify_ctrl_id)
-    ctrlNode.appendChild(actions);
+    const actions = createActionButtons(ctrl.guify_ctrl_id);
+    (ctrlNode.querySelector('.tool-bar') as HTMLDivElement).prepend(actions);
     ctrlsContainer.appendChild(ctrlNode);
   }
 }
 
 function createActionButtons(ctrlId: number): HTMLElement {
-  const container = create('div', ['control-actions']);
+  const container = create('div', ['actions']);
   const del = create('i', ['bi', 'bi-trash-fill']);
   const edit = create('i', ['bi', 'bi-pencil-square']);
   const id = ctrlId.toString();
@@ -47,13 +47,6 @@ function createActionButtons(ctrlId: number): HTMLElement {
 
   container.append(edit, del);
   return container;
-}
-
-function setPageTitle(): void {
-  (get('title') as HTMLParagraphElement).innerHTML = `
-    <span>${GUI.gui_name}</span>
-    <span>Entwicklungsmodus</span>
-  `;
 }
 
 // Control form logic
@@ -76,6 +69,7 @@ listen('new_ctrl_btn', 'click', openCtrlForm);
 async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
   try {
     event.preventDefault();
+    
     const control = cleanFormData();
     if (!control) return;
 
@@ -247,7 +241,7 @@ function checkNameExists(name: string): boolean {
 
 async function onDeleteClick(event: MouseEvent): Promise<void> {
   const id = (event.currentTarget as HTMLElement).dataset.id as string;
-  const action = await promptUser('Diese Frage endgültig entfernen?', 'Entfernen');
+  const action = await promptUser('Frage endgültig entfernen?', 'Entfernen');
 
   if (action === 'confirm')
     deleteControl(id);
@@ -267,7 +261,7 @@ async function deleteControl(id: string): Promise<void> {
 }
 
 async function onProductionClick(): Promise<void> {
-  const action = await promptUser('In den Productionsmodus wechseln?', 'Bestätigen');
+  const action = await promptUser('In den Produktionsmodus wechseln?\nDanach können Sie die Fragen nicht mehr bearbeiten.\nDieser Schritt kann nicht rückgängig gemacht werden!', 'Bestätigen');
 
   if (action === 'confirm')
     makeProduction();

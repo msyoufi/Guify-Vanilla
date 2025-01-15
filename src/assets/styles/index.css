@@ -1,4 +1,5 @@
 #name_input_box {
+  margin-bottom: 2rem;
   padding: .5rem 0;
   position: relative;
   opacity: 0;
@@ -20,25 +21,40 @@
   height: 1.5rem;
 }
 
+#guis_container {
+  display: flex;
+  flex-direction: column;
+  row-gap: .5rem;
+}
+
 .gui-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 3.5rem;
   padding: .5rem 1rem;
   border-radius: var(--radius);
+  border: 3px solid var(--orange);
   transition: var(--transition);
   cursor: pointer;
 }
 
+.gui-bar.prod {
+  border-color: var(--green);
+}
+
 .gui-bar:hover {
-  background-color: var(--blue-secondary);
+  background-color: var(--orange-light);
+}
+
+.gui-bar.prod:hover {
+  background-color: var(--green-light);
 }
 
 .gui-bar:active {
-  background-color: var(--blue-primary);
-  color: white;
+  filter: brightness(.85);
 }
 
 .gui-bar>span {
-  font-size: 1.1rem;
+  font-weight: 600;
 }
