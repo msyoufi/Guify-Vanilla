@@ -1,5 +1,7 @@
 import Database from 'better-sqlite3';
 import { pathTo } from '../../main.js';
+import { IpcMainInvokeEvent } from 'electron';
+import { dynamicInsert } from './db-utils.js';
 
 export const db = new Database(pathTo('db/data.db'));
 db.pragma('journal_mode = WAL');
@@ -7,12 +9,12 @@ db.pragma('journal_mode = WAL');
 export function createDataTable(gui: GUI, controls: FormControl[]): void {
   try {
     const columnsStr = getColumnsStr(controls);
-    const tableName = getTableName(gui);
+    const table = getTableName(gui);
 
     db.prepare(`
-      CREATE TABLE IF NOT EXISTS ${tableName} (
+      CREATE TABLE IF NOT EXISTS ${table} (
         entry_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        gui_id INTEGER NOT NULL UNIQUE,
+        gui_id INTEGER NOT NULL,
         ${columnsStr}
       )
     `).run();
@@ -32,8 +34,19 @@ function getColumnsStr(controls: FormControl[]): string {
 
 export function deleteTable(gui: GUI): void {
   try {
-    const tableName = getTableName(gui);
-    db.prepare(`DROP TABLE ${tableName}`).run();
+    const table = getTableName(gui);
+    db.prepare(`DROP TABLE ${table}`).run();
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function insertEntry(_: IpcMainInvokeEvent, gui: GUI, data: Record<string, any>): number {
+  try {
+    const table = getTableName(gui);
+    const result = dynamicInsert(db, table, data);
+    return result.changes;
 
   } catch (err: unknown) {
     throw err;

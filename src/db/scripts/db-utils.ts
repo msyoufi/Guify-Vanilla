@@ -1,6 +1,6 @@
 import Database, { RunResult } from 'better-sqlite3';
 
-export function dynamicInsert(db: Database.Database, table: string, data: { [key: string]: any }): RunResult {
+export function dynamicInsert(db: Database.Database, table: string, data: Record<string, any>): RunResult {
   try {
     const keys = Object.keys(data);
     const columns = keys.join(', ');

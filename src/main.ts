@@ -23,6 +23,8 @@ function onAppReady(): void {
   ipcMain.handle('form-control:update', fromsDB.updateFormControl);
   ipcMain.handle('form-control:delete', fromsDB.deleteFormControl);
   ipcMain.handle('form-control:get-all', fromsDB.getFormControls);
+
+  ipcMain.handle('data:insert', dataDB.insertEntry);
 }
 
 app.on('window-all-closed', () => {

@@ -55,8 +55,11 @@ async function onFormSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
 
     const entry = getFormValues(entryForm);
-    console.log(entry);
+    entry.gui_id = GUI.gui_id;
+    const changes = await window.electron.handle<number>('data:insert', GUI, entry);
+    if (!changes) throw new Error();
 
+    showMessage('Eintrag erfolgreich gespeichert', 'green');
 
   } catch (err: unknown) {
     console.log(err);
