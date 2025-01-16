@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import { IpcMainInvokeEvent } from 'electron';
 import { pathTo } from '../../main.js';
-import { dynamicInsert } from './db-utils.js';
+import { dynamicInsert, dynamicUpdate } from './db-utils.js';
 
 export const db = new Database(pathTo('db/forms.db'));
 db.pragma('journal_mode = WAL');
@@ -96,17 +96,11 @@ export function insertFormControl(_: IpcMainInvokeEvent, control: NewFormControl
 
 export function updateFormControl(_: IpcMainInvokeEvent, control: FormControl): number {
   const { guify_ctrl_choices, guify_ctrl_id, project_id, ...controlData } = control;
-  const keys = Object.keys(controlData);
-  const values = keys.map(key => key + ' = @' + key).join(', ');
   let changes = 0;
 
   try {
     db.transaction(() => {
-      const result = db.prepare(`
-        UPDATE controls SET ${values} WHERE guify_ctrl_id = ${guify_ctrl_id}
-      `).run(controlData);
-
-      changes = result.changes;
+      changes = dynamicUpdate(db, 'controls', controlData, `guify_ctrl_id = ${guify_ctrl_id}`);
 
       if (changes) {
         db.prepare(`

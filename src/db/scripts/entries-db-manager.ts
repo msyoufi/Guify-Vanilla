@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { pathTo } from '../../main.js';
 import { IpcMainInvokeEvent } from 'electron';
-import { dynamicInsert } from './db-utils.js';
+import { dynamicInsert, dynamicUpdate } from './db-utils.js';
 
 export const db = new Database(pathTo('db/entries.db'));
 db.pragma('journal_mode = WAL');
@@ -42,11 +42,45 @@ export function deleteTable(project: GuifyProject): void {
   }
 }
 
-export function insertEntry(_: IpcMainInvokeEvent, project: GuifyProject, data: Record<string, any>): number {
+export function insertEntry(project: GuifyProject, data: Record<string, any>): number {
   try {
     const table = getTableName(project);
     const result = dynamicInsert(db, table, data);
     return result.changes;
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function updateEntry(project: GuifyProject, data: Record<string, any>): number {
+  try {
+    const table = getTableName(project);
+    return dynamicUpdate(db, table, data, `entry_id = ${data.entry_id}`);
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function deleteEntry(_: IpcMainInvokeEvent, project: GuifyProject, id: number): number {
+  try {
+    const table = getTableName(project);
+    const result = db.prepare(`
+      DELETE FROM ${table} WHERE entry_id = ?
+    `).run(id);
+
+    return result.changes;
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function getEntries(_: IpcMainInvokeEvent, project: GuifyProject): any[] {
+  try {
+    const table = getTableName(project);
+    return db.prepare(`SELECT * FROM ${table}`).all();
 
   } catch (err: unknown) {
     throw err;

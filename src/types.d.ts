@@ -44,7 +44,12 @@ const channels = {
   'form-control:delete': '',
   'form-control:get-all': '',
 
-  'entry:insert': ''
+  'entry:update': '',
+  'entry:delete': '',
+  'entry:get-all': '',
+
+  'entry-form:open': '',
+  'entry-form:data': '',
 } as const;
 
 type GuifyChannel = keyof typeof channels;

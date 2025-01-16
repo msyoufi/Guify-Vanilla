@@ -108,7 +108,7 @@ async function onDeleteClick(e: MouseEvent): Promise<void> {
 async function deleteProject(project: GuifyProject): Promise<void> {
   try {
     await window.electron.handle<void>('project:delete', project);
-    showMessage(`Projekt ${project.name} samt dessen Daten endgütlig gelöscht`);
+    showMessage(`Projekt ${project.name} samt dessen Daten endgütlig gelöscht`, 'green');
     renderProjects();
 
   } catch (err: unknown) {

@@ -16,3 +16,19 @@ export function dynamicInsert(db: Database.Database, table: string, data: Record
     throw err;
   }
 }
+
+export function dynamicUpdate(db: Database.Database, table: string, data: Record<string, any>, condition: string): number {
+  try {
+    const keys = Object.keys(data);
+    const values = keys.map(key => key + ' = @' + key).join(', ');
+
+    const result = db.prepare(`
+      UPDATE ${table} SET ${values} WHERE ${condition}
+    `).run(data);
+
+    return result.changes;
+
+  } catch (err: unknown) {
+    throw err;
+  }
+}
