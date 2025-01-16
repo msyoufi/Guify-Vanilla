@@ -23,23 +23,26 @@ function createProjectElement(project: GuifyProject): HTMLElement {
   const actions = create('div', ['actions']);
 
   const copy = create('i', ['bi', 'bi-copy']);
-  const exp = create('i', ['bi', 'bi-database-fill-up']);
   const del = create('i', ['bi', 'bi-trash-fill']);
 
-  if (project.production) projectBar.classList.add('prod');
+  if (project.production) {
+    projectBar.classList.add('prod');
+    const exp = create('i', ['bi', 'bi-database-fill-up']);
+    exp.dataset.projectId = projectId;
+    listen(exp, 'click', onExportClick);
+    actions.append(exp);
+  }
 
   listen(projectBar, 'click', onProjectBarClick);
   listen(copy, 'click', onCopyClick);
-  listen(exp, 'click', onExportClick);
   listen(del, 'click', onDeleteClick);
 
   projectBar.innerHTML = `<span>${project.name}</span>`;
   projectBar.dataset.projectId = projectId;
   copy.dataset.projectId = projectId;
-  exp.dataset.projectId = projectId;
   del.dataset.projectId = projectId;
 
-  actions.append(copy, exp, del);
+  actions.append(copy, del);
   projectBar.appendChild(actions);
 
   return projectBar;
