@@ -20,6 +20,7 @@ function onAppReady(): void {
   ipcMain.handle('project:open', openProject);
   ipcMain.handle('project:delete', deleteProject);
   ipcMain.handle('project:production', makeProduction);
+  ipcMain.handle('project:copy', copyProject);
 
   ipcMain.handle('form-control:insert', formsDB.insertFormControl);
   ipcMain.handle('form-control:update', formsDB.updateFormControl);
@@ -53,7 +54,23 @@ function deleteProject(e: IpcMainInvokeEvent, project: GuifyProject): void {
       entriesDB.deleteTable(project);
 
   } catch (err) {
-    console.log(err)
+    throw err;
+  }
+}
+
+function copyProject(e: IpcMainInvokeEvent, project: GuifyProject): void {
+  try {
+    const newName = project.name + '_copy';
+    const newProjectId = formsDB.insertProject(e, newName);
+    const controls = formsDB.getFormControls(e, project.id);
+
+    for (const ctrl of controls) {
+      const { guify_ctrl_id, ...ctrlData } = ctrl;
+      ctrlData.project_id = newProjectId;
+      formsDB.insertFormControl(e, ctrlData);
+    }
+
+  } catch (err) {
     throw err;
   }
 }

@@ -4,7 +4,7 @@ import { IpcMainInvokeEvent } from 'electron';
 import { pathTo } from '../../main.js';
 import { dynamicInsert, dynamicUpdate } from './db-utils.js';
 
-export const db = new Database(pathTo('db/forms.db'));
+const db = new Database(pathTo('db/forms.db'));
 db.pragma('journal_mode = WAL');
 
 initDB();
@@ -25,7 +25,7 @@ export function insertProject(_: IpcMainInvokeEvent, projectName: string): numbe
       INSERT INTO projects (name, production) VALUES (?, 0)
     `).run(projectName);
 
-    return result.changes;
+    return result.lastInsertRowid as number;
 
   } catch (err: unknown) {
     throw err;

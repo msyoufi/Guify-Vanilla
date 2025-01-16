@@ -38,6 +38,7 @@ const channels = {
   'project:open': '',
   'project:data': '',
   'project:production': '',
+  'project:copy': '',
 
   'form-control:insert': '',
   'form-control:update': '',

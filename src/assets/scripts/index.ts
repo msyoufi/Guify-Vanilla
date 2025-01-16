@@ -21,21 +21,25 @@ function createProjectElement(project: GuifyProject): HTMLElement {
   const projectId = project.id.toString();
   const projectBar = create('div', ['project-bar']);
   const actions = create('div', ['actions']);
+
+  const copy = create('i', ['bi', 'bi-copy']);
   const exp = create('i', ['bi', 'bi-database-fill-up']);
   const del = create('i', ['bi', 'bi-trash-fill']);
 
   if (project.production) projectBar.classList.add('prod');
 
   listen(projectBar, 'click', onProjectBarClick);
+  listen(copy, 'click', onCopyClick);
   listen(exp, 'click', onExportClick);
   listen(del, 'click', onDeleteClick);
 
   projectBar.innerHTML = `<span>${project.name}</span>`;
   projectBar.dataset.projectId = projectId;
+  copy.dataset.projectId = projectId;
   exp.dataset.projectId = projectId;
   del.dataset.projectId = projectId;
 
-  actions.append(exp, del);
+  actions.append(copy, exp, del);
   projectBar.appendChild(actions);
 
   return projectBar;
@@ -140,6 +144,27 @@ async function exportData(project: GuifyProject): Promise<void> {
     renderProjects();
 
   } catch (err: unknown) {
-    showMessage('Es ist ein Fehler bei der Löschung aufgetreten');
+    showMessage('Es ist ein Fehler beim Export aufgetreten');
+  }
+}
+
+async function onCopyClick(e: MouseEvent): Promise<void> {
+  e.stopPropagation();
+  const project = getProject(e);
+  const action = await promptUser(`Eine neue Kopie des Projekts: ${project.name} ohne Einträge erstellen?`, 'Kopieren');
+
+  if (action === 'confirm')
+    copyProject(project);
+}
+
+async function copyProject(project: GuifyProject): Promise<void> {
+  try {
+    await window.electron.handle<void>('project:copy', project);
+
+    showMessage(`Projekt ${project.name} erfolgreich kopiert`, 'green');
+    renderProjects();
+
+  } catch (err: unknown) {
+    showMessage('Es ist ein Fehler beim Kopieren aufgetreten');
   }
 }

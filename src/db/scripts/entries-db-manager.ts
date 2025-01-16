@@ -3,7 +3,7 @@ import { pathTo } from '../../main.js';
 import { IpcMainInvokeEvent } from 'electron';
 import { dynamicInsert, dynamicUpdate } from './db-utils.js';
 
-export const db = new Database(pathTo('db/entries.db'));
+const db = new Database(pathTo('db/entries.db'));
 db.pragma('journal_mode = WAL');
 
 export function createDataTable(project: GuifyProject, controls: FormControl[]): void {
