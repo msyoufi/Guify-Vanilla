@@ -14,30 +14,44 @@
 </head>
 
 <body>
-  <p class="title-box">
-    <span id="title"></span>
-    <span>Entwicklungsmodus</span>
-  </p>
-
-  <button id="new_ctrl_btn" class="guify-button">
-    New Frage
-    <i class="bi bi-plus-square"></i>
-  </button>
-
-  <div id="ctrls_container"></div>
-
-  <div class="production-box">
-    <p>
-      Das Projekt befindet sich noch im Entwicklungsmodus. Hier können Sie die Fragen bearbeiten. Wechseln Sie
-      in den Produktionsmodus, um mit der Datenakquise zu beginnen. Danach können Sie die
-      Fragen nicht mehr bearbeiten. Dieser Schritt kann nicht rückgängig gemacht werden.
+  <header>
+    <p class="title-box">
+      <span id="title"></span>
+      <span>Entwicklungsmodus</span>
     </p>
-
-    <button id="production_btn" class="guify-button red-button">
-      Zum Produktionsmodus Wechseln
-      <i class="bi bi-arrow-repeat"></i>
+  </header>
+  <main>
+    <button id="new_ctrl_btn" class="guify-button">
+      New Frage
+      <i class="bi bi-plus-square"></i>
     </button>
-  </div>
+
+    <div class="form-control">
+      <div class="tool-bar">
+        <span class="var-name">Variable: entry_id*</span>
+      </div>
+      <label for="entry_id">Eintrag-ID</label>
+      <input type="text" class="guify-input" name="entry_id" id="entry_id" disabled
+        placeholder="Dieses Eingabefeld ist obligatorisch und kann nicht geändert werden">
+    </div>
+
+    <div id="ctrls_container"></div>
+  </main>
+
+  <footer>
+    <div class="production-box">
+      <p>
+        Das Projekt befindet sich noch im Entwicklungsmodus. Hier können Sie die Fragen bearbeiten. Wechseln Sie
+        in den Produktionsmodus, um mit der Datenakquise zu beginnen. Danach können Sie die
+        Fragen nicht mehr bearbeiten. Dieser Schritt kann nicht rückgängig gemacht werden.
+      </p>
+
+      <button id="production_btn" class="guify-button red-button">
+        Zum Produktionsmodus Wechseln
+        <i class="bi bi-arrow-repeat"></i>
+      </button>
+    </div>
+  </footer>
 
   <div class="overlay" id="ctrl_form_overlay">
     <form id="ctrl_form">
@@ -60,7 +74,7 @@
 
       <div class="form-control">
         <label for="guify_ctrl_name">
-          Feldname
+          Variablenname
           <small id="name_err"></small>
         </label>
         <input type="text" class="guify-input" name="guify_ctrl_name" id="guify_ctrl_name" maxlength="20" required>

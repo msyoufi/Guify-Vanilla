@@ -1,29 +1,27 @@
 import { create } from "./utils.js";
 
 export function createControlElement(control: FormControl): HTMLElement {
-  const wrapper = create('div', ['control-wrapper']);
-  const ctrlBox = create('div', ['form-control']);
+  const formControl = create('div', ['form-control']);
 
   switch (control.guify_ctrl_type) {
     case 'text':
     case 'number':
     case 'date':
     case 'time':
-      ctrlBox.innerHTML = createTextInput(control);
+      formControl.innerHTML = createTextInput(control);
       break;
     case 'textArea':
-      ctrlBox.innerHTML = createTextArea(control);
+      formControl.innerHTML = createTextArea(control);
       break;
     case 'select':
-      ctrlBox.innerHTML = createSelectInput(control);
+      formControl.innerHTML = createSelectInput(control);
       break;
     case 'checkbox':
     case 'radio':
-      ctrlBox.innerHTML = createMcInput(control);
+      formControl.innerHTML = createMcInput(control);
   }
 
-  wrapper.append(ctrlBox);
-  return wrapper;
+  return formControl;
 }
 
 function createTextInput(ctrl: FormControl): string {
@@ -68,7 +66,7 @@ function createMcInput(ctrl: FormControl): string {
 function createLabel(ctrl: FormControl): string {
   return `
     <div class="tool-bar">
-      <span class="var-name">Feldname:${ctrl.guify_ctrl_name}${ctrl.guify_ctrl_required ? '*' : ''}</span>
+      <span class="var-name">Vaiable: ${ctrl.guify_ctrl_name}${ctrl.guify_ctrl_required ? '*' : ''}</span>
     </div>
     <label for="${ctrl.guify_ctrl_name}">${ctrl.guify_ctrl_label}</label>
   `;

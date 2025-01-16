@@ -22,13 +22,29 @@
   user-select: none;
 }
 
-#main {
+body {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+main {
+  flex: 1;
   width: 100%;
-  max-width: 500px;
-  margin: 8rem auto 0;
+  max-width: 700px;
+  margin: 0 auto 4rem;
   padding: 0 1rem;
+}
+
+footer {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
 }
 
 /* inputs and buttons */
@@ -138,33 +154,24 @@ textarea:disabled {
 #ctrls_container {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  margin-bottom: 4rem;
-  padding: 1rem;
-}
-
-.control-wrapper {
-  display: flex;
   width: 100%;
-  justify-content: center;
 }
 
 .form-control {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 700px;
   padding: 2rem 0 1rem;
   gap: .5rem;
-  border-bottom: 1px solid var(--gray);
+  border-bottom: 1px solid #e8e8e8;
 }
 
-#ctrls_container>div:last-child .form-control {
+#ctrls_container .form-control:last-child {
   border-bottom: none;
 }
 
 .form-control>label {
-  margin-left: .75rem;
+  margin-left: 1rem;
 }
 
 .tool-bar {

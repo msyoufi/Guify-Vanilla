@@ -5,11 +5,3 @@
   font-weight: 600;
   background-color: var(--green-light);
 }
-
-#entry_form {
-  margin-bottom: 4rem;
-}
-
-.form-buttons {
-  margin: 0 auto;
-}
