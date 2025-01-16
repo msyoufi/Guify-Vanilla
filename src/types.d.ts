@@ -47,6 +47,7 @@ const channels = {
   'entry:update': '',
   'entry:delete': '',
   'entry:get-all': '',
+  'entry:export': '',
 
   'entry-form:open': '',
   'entry-form:data': '',

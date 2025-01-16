@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from 'electron';
 import { join as joinPath } from 'node:path';
 import * as formsDB from './db/scripts/forms-db-manager.js';
 import * as entriesDB from './db/scripts/entries-db-manager.js';
+import * as exp from './export-manager.js';
 
 let MAIN_WINDOW: BrowserWindow;
 let projectWindow: BrowserWindow;
@@ -28,6 +29,7 @@ function onAppReady(): void {
   ipcMain.handle('entry:update', updateEntry);
   ipcMain.handle('entry:delete', entriesDB.deleteEntry);
   ipcMain.handle('entry:get-all', entriesDB.getEntries);
+  ipcMain.handle('entry:export', exp.exportData);
 
   ipcMain.handle('entry-form:open', openEntryForm);
 }
@@ -88,6 +90,7 @@ function updateEntry(e: IpcMainInvokeEvent, project: GuifyProject, data: Record<
 
   return changes;
 }
+
 
 // Utils
 
