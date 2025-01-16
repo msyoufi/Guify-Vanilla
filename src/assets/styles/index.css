@@ -21,13 +21,13 @@
   height: 1.5rem;
 }
 
-#guis_container {
+#projects_container {
   display: flex;
   flex-direction: column;
   row-gap: .5rem;
 }
 
-.gui-bar {
+.project-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -39,22 +39,22 @@
   cursor: pointer;
 }
 
-.gui-bar.prod {
+.project-bar.prod {
   border-color: var(--green);
 }
 
-.gui-bar:hover {
+.project-bar:hover {
   background-color: var(--orange-light);
 }
 
-.gui-bar.prod:hover {
+.project-bar.prod:hover {
   background-color: var(--green-light);
 }
 
-.gui-bar:active {
+.project-bar:active {
   filter: brightness(.85);
 }
 
-.gui-bar>span {
+.project-bar>span {
   font-weight: 600;
 }

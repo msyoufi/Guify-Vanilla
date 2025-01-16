@@ -1,45 +1,45 @@
 import { listen, create, get, showMessage, promptUser } from "./utils.js";
 
-let guisCach: GUI[] = [];
-const guisContainer = <HTMLDivElement>get('guis_container');
+let projectsCach: GuifyProject[] = [];
+const projectsContainer = <HTMLDivElement>get('projects_container');
 const nameInput = <HTMLInputElement>get('name_input');
 const nameInputBox = <HTMLInputElement>get('name_input_box');
 
-window.electron.recieve('gui:data', renderGuis);
+window.electron.recieve('project:data', renderProjects);
 
-renderGuis();
+renderProjects();
 
-async function renderGuis(): Promise<void> {
-  guisCach = await window.electron.handle<GUI[]>('gui:get-all');
-  guisContainer.innerHTML = '';
+async function renderProjects(): Promise<void> {
+  projectsCach = await window.electron.handle<GuifyProject[]>('project:get-all');
+  projectsContainer.innerHTML = '';
 
-  for (const gui of guisCach)
-    guisContainer.append(createGuiElement(gui));
+  for (const project of projectsCach)
+    projectsContainer.append(createProjectElement(project));
 }
 
-function createGuiElement(gui: GUI): HTMLElement {
-  const guiId = gui.gui_id.toString();
+function createProjectElement(project: GuifyProject): HTMLElement {
+  const projectId = project.id.toString();
 
-  const guiBar = create('div', ['gui-bar']);
+  const projectBar = create('div', ['project-bar']);
   const actions = create('div', ['actions']);
   const del = create('i', ['bi', 'bi-trash-fill']);
 
-  if (gui.production) guiBar.classList.add('prod');
+  if (project.production) projectBar.classList.add('prod');
 
-  listen(guiBar, 'click', onGuiBarClick);
+  listen(projectBar, 'click', onProjectBarClick);
   listen(del, 'click', onDeleteClick);
 
-  guiBar.innerHTML = `<span>${gui.gui_name}</span>`;
-  guiBar.dataset.guiId = guiId;
-  del.dataset.guiId = guiId;
+  projectBar.innerHTML = `<span>${project.name}</span>`;
+  projectBar.dataset.projectId = projectId;
+  del.dataset.projectId = projectId;
 
   actions.append(del);
-  guiBar.appendChild(actions);
+  projectBar.appendChild(actions);
 
-  return guiBar;
+  return projectBar;
 }
 
-listen('new_gui_btn', 'click', showNameBox);
+listen('new_project_btn', 'click', showNameBox);
 listen('close_name_btn', 'click', hideNameBox);
 listen(nameInput, 'keyup', onKeyUp);
 
@@ -60,10 +60,10 @@ async function onKeyUp(e: KeyboardEvent): Promise<void> {
   if (e.code === 'Escape')
     return hideNameBox();
 
-  const guiName = nameInput.value;
-  if (!guiName) return;
+  const projectName = nameInput.value;
+  if (!projectName) return;
 
-  const invalid = !/^[a-zA-Z_][a-zA-Z0-9_ ]*$/.test(guiName) || checkNameExists(guiName);
+  const invalid = !/^[a-zA-Z_][a-zA-Z0-9_ ]*$/.test(projectName) || checkNameExists(projectName);
 
   if (invalid)
     nameInput.classList.add('invalid');
@@ -74,9 +74,9 @@ async function onKeyUp(e: KeyboardEvent): Promise<void> {
     if (invalid) return showMessage('Projektname unzulässig oder bereits vergeben!');
 
     try {
-      await window.electron.handle<number>('gui:insert', guiName);
+      await window.electron.handle<number>('project:insert', projectName);
       hideNameBox();
-      renderGuis();
+      renderProjects();
 
     } catch (err: unknown) {
       showMessage('Es ist ein Fehler bei der Erstellung des Projekts aufgetreten!');
@@ -84,39 +84,39 @@ async function onKeyUp(e: KeyboardEvent): Promise<void> {
   }
 }
 
-function checkNameExists(guiName: string): boolean {
-  if (guisCach.findIndex(g => g.gui_name === guiName) > -1)
+function checkNameExists(projectName: string): boolean {
+  if (projectsCach.findIndex(p => p.name === projectName) > -1)
     return true;
 
   return false;
 }
 
-function onGuiBarClick(e: MouseEvent): void {
-  const gui = getGUI(e);
-  window.electron.handle<void>('gui:open', gui);
+function onProjectBarClick(e: MouseEvent): void {
+  const project = getProject(e);
+  window.electron.handle<void>('project:open', project);
 }
 
 async function onDeleteClick(e: MouseEvent): Promise<void> {
   e.stopPropagation();
-  const gui = getGUI(e);
-  const action = await promptUser(`${gui.gui_name} endgütlig löschen?`, 'Löschen');
+  const project = getProject(e);
+  const action = await promptUser(`${project.name} endgütlig löschen?`, 'Löschen');
 
   if (action === 'confirm')
-    deleteGui(gui);
+    deleteProject(project);
 }
 
-async function deleteGui(gui: GUI): Promise<void> {
+async function deleteProject(project: GuifyProject): Promise<void> {
   try {
-    await window.electron.handle<void>('gui:delete', gui);
-    showMessage(`Projekt ${gui.gui_name} samt dessen Daten endgütlig gelöscht`);
-    renderGuis();
+    await window.electron.handle<void>('project:delete', project);
+    showMessage(`Projekt ${project.name} samt dessen Daten endgütlig gelöscht`);
+    renderProjects();
 
   } catch (err: unknown) {
     showMessage('Es ist ein Fehler bei der Löschung aufgetreten');
   }
 }
 
-function getGUI(e: MouseEvent): GUI {
-  const gui_id = Number((<HTMLElement>e.currentTarget).dataset.guiId);
-  return guisCach.find(g => g.gui_id === gui_id) as GUI;
+function getProject(e: MouseEvent): GuifyProject {
+  const project_id = Number((<HTMLElement>e.currentTarget).dataset.projectId);
+  return projectsCach.find(p => p.id === project_id) as GuifyProject;
 }

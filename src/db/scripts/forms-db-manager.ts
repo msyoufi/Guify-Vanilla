@@ -19,11 +19,11 @@ function initDB(): void {
   }
 }
 
-export function insertGui(_: IpcMainInvokeEvent, guiName: string): number {
+export function insertProject(_: IpcMainInvokeEvent, projectName: string): number {
   try {
     const result = db.prepare(`
-      INSERT INTO guis (gui_name, production) VALUES (?, 0)
-    `).run(guiName);
+      INSERT INTO projects (name, production) VALUES (?, 0)
+    `).run(projectName);
 
     return result.changes;
 
@@ -32,11 +32,23 @@ export function insertGui(_: IpcMainInvokeEvent, guiName: string): number {
   }
 }
 
-export function deleteGui(guiId: number): number {
+export function updateProject(_: IpcMainInvokeEvent, projectId: number, column: string, value: any): number {
   try {
     const result = db.prepare(`
-      DELETE FROM guis WHERE gui_id = ?
-    `).run(guiId);
+      UPDATE projects SET ${column} = @value WHERE id = @projectId
+    `).run({ value, projectId });
+
+    return result.changes;
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
+export function deleteProject(projectId: number): number {
+  try {
+    const result = db.prepare(`
+      DELETE FROM projects WHERE id = ?
+    `).run(projectId);
 
     return result.changes;
 
@@ -45,22 +57,10 @@ export function deleteGui(guiId: number): number {
   }
 }
 
-export function getGuis(_: IpcMainInvokeEvent): GUI[] {
+export function getProjects(_: IpcMainInvokeEvent): GuifyProject[] {
   try {
-    return db.prepare(`SELECT * FROM guis`).all() as GUI[];
+    return db.prepare(`SELECT * FROM projects`).all() as GuifyProject[];
 
-  } catch (err: unknown) {
-    throw err;
-  }
-}
-
-export function updateGui(_: IpcMainInvokeEvent, gui_id: number, column: string, value: any): number {
-  try {
-    const result = db.prepare(`
-      UPDATE guis SET ${column} = @value WHERE gui_id = @gui_id
-    `).run({ value, gui_id });
-
-    return result.changes;
   } catch (err: unknown) {
     throw err;
   }
@@ -95,7 +95,7 @@ export function insertFormControl(_: IpcMainInvokeEvent, control: NewFormControl
 }
 
 export function updateFormControl(_: IpcMainInvokeEvent, control: FormControl): number {
-  const { guify_ctrl_choices, guify_ctrl_id, gui_id, ...controlData } = control;
+  const { guify_ctrl_choices, guify_ctrl_id, project_id, ...controlData } = control;
   const keys = Object.keys(controlData);
   const values = keys.map(key => key + ' = @' + key).join(', ');
   let changes = 0;
@@ -144,15 +144,15 @@ export function deleteFormControl(_: IpcMainInvokeEvent, id: string): number {
   }
 }
 
-export function getFormControls(_: IpcMainInvokeEvent, guiId: number): FormControl[] {
+export function getFormControls(_: IpcMainInvokeEvent, projectId: number): FormControl[] {
   try {
     const stmnt = db.prepare(`
     SELECT controls.*, choices.* FROM controls
     LEFT JOIN choices ON controls.guify_ctrl_id = choices.control_id
-    WHERE controls.gui_id = ?;
+    WHERE controls.project_id = ?;
   `);
 
-    const result: any[] = stmnt.all(guiId);
+    const result: any[] = stmnt.all(projectId);
 
     if (!result.length) return [];
 

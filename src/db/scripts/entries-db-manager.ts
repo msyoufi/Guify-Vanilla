@@ -3,18 +3,18 @@ import { pathTo } from '../../main.js';
 import { IpcMainInvokeEvent } from 'electron';
 import { dynamicInsert } from './db-utils.js';
 
-export const db = new Database(pathTo('db/data.db'));
+export const db = new Database(pathTo('db/entries.db'));
 db.pragma('journal_mode = WAL');
 
-export function createDataTable(gui: GUI, controls: FormControl[]): void {
+export function createDataTable(project: GuifyProject, controls: FormControl[]): void {
   try {
     const columnsStr = getColumnsStr(controls);
-    const table = getTableName(gui);
+    const table = getTableName(project);
 
     db.prepare(`
       CREATE TABLE IF NOT EXISTS ${table} (
         entry_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        gui_id INTEGER NOT NULL,
+        project_id INTEGER NOT NULL,
         ${columnsStr}
       )
     `).run();
@@ -32,9 +32,9 @@ function getColumnsStr(controls: FormControl[]): string {
   return columns.join(', ');
 }
 
-export function deleteTable(gui: GUI): void {
+export function deleteTable(project: GuifyProject): void {
   try {
-    const table = getTableName(gui);
+    const table = getTableName(project);
     db.prepare(`DROP TABLE ${table}`).run();
 
   } catch (err: unknown) {
@@ -42,9 +42,9 @@ export function deleteTable(gui: GUI): void {
   }
 }
 
-export function insertEntry(_: IpcMainInvokeEvent, gui: GUI, data: Record<string, any>): number {
+export function insertEntry(_: IpcMainInvokeEvent, project: GuifyProject, data: Record<string, any>): number {
   try {
-    const table = getTableName(gui);
+    const table = getTableName(project);
     const result = dynamicInsert(db, table, data);
     return result.changes;
 
@@ -53,8 +53,8 @@ export function insertEntry(_: IpcMainInvokeEvent, gui: GUI, data: Record<string
   }
 }
 
-function getTableName(gui: GUI): string {
-  return gui.gui_name.replaceAll(' ', '_') + `__${gui.gui_id}`;
+function getTableName(project: GuifyProject): string {
+  return project.name.replaceAll(' ', '_') + `__${project.id}`;
 }
 
 export function close(): void {

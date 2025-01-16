@@ -5,14 +5,14 @@ interface Window {
   }
 };
 
-interface GUI {
-  gui_id: number,
-  gui_name: string,
+interface GuifyProject {
+  id: number,
+  name: string,
   production: 0 | 1
 }
 
 interface NewFormControl {
-  gui_id: number,
+  project_id: number,
   guify_ctrl_name: string,
   guify_ctrl_type: string,
   guify_ctrl_label: string,
@@ -32,19 +32,19 @@ interface FormControlChoice {
 const channels = {
   'window:close': '',
 
-  'gui:insert': '',
-  'gui:delete': '',
-  'gui:get-all': '',
-  'gui:open': '',
-  'gui:data': '',
-  'gui:production': '',
+  'project:insert': '',
+  'project:delete': '',
+  'project:get-all': '',
+  'project:open': '',
+  'project:data': '',
+  'project:production': '',
 
   'form-control:insert': '',
   'form-control:update': '',
   'form-control:delete': '',
   'form-control:get-all': '',
 
-  'data:insert': ''
+  'entry:insert': ''
 } as const;
 
 type GuifyChannel = keyof typeof channels;

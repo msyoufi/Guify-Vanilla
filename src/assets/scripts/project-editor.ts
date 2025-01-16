@@ -2,21 +2,21 @@ import { get, getFormValues, listen, create, promptUser, showMessage } from "./u
 import { createControlElement } from './control-renderer.js';
 import { IpcMainInvokeEvent } from "electron";
 
-let GUI: GUI;
+let PROJECT: GuifyProject;
 let controlsCach: FormControl[] = [];
 const typesWithChoices = ['select', 'radio', 'checkbox'];
 
 const productionBtn = <HTMLButtonElement>get('production_btn');
 const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
 
-window.electron.recieve('gui:data', (e: IpcMainInvokeEvent, gui: GUI) => {
-  GUI = gui;
+window.electron.recieve('project:data', (e: IpcMainInvokeEvent, project: GuifyProject) => {
+  PROJECT = project;
   renderControls();
-  (get('title') as HTMLParagraphElement).innerText = GUI.gui_name;
+  (get('title') as HTMLParagraphElement).innerText = PROJECT.name;
 });
 
 async function renderControls(): Promise<void> {
-  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', GUI.gui_id);
+  controlsCach = await window.electron.handle<FormControl[]>('form-control:get-all', PROJECT.id);
 
   productionBtn.disabled = controlsCach.length ? false : true;
   ctrlsContainer.innerHTML = '';
@@ -69,7 +69,7 @@ listen('new_ctrl_btn', 'click', openCtrlForm);
 async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
   try {
     event.preventDefault();
-    
+
     const control = cleanFormData();
     if (!control) return;
 
@@ -88,7 +88,7 @@ async function onCtrlSubmit(event: SubmitEvent): Promise<void> {
 
 function cleanFormData(): FormControl | NewFormControl | null {
   const { guify_ctrl_choices, ...control } = getFormValues(ctrlForm);
-  control.gui_id = GUI.gui_id;
+  control.project_id = PROJECT.id;
 
   if (guify_ctrl_choices) {
     const cleanedChoices = cleanChoices(guify_ctrl_choices);
@@ -269,7 +269,7 @@ async function onProductionClick(): Promise<void> {
 
 async function makeProduction(): Promise<void> {
   try {
-    await window.electron.handle<number>('gui:production', GUI, controlsCach);
+    await window.electron.handle<number>('project:production', PROJECT, controlsCach);
     lockView();
 
   } catch (err: unknown) {

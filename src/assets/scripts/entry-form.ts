@@ -2,16 +2,16 @@ import { IpcMainInvokeEvent } from "electron";
 import { createControlElement } from "./control-renderer.js";
 import { create, get, getFormValues, listen, showMessage } from "./utils.js";
 
-let GUI: GUI;
+let PROJECT: GuifyProject;
 const ctrlsContainer = <HTMLDivElement>get('ctrls_container');
 
 // Render logic
 
-window.electron.recieve('gui:data', async (e: IpcMainInvokeEvent, gui: GUI) => {
-  GUI = gui;
-  const controls = await window.electron.handle<FormControl[]>('form-control:get-all', gui.gui_id);
+window.electron.recieve('project:data', async (e: IpcMainInvokeEvent, projects: GuifyProject) => {
+  PROJECT = projects;
+  const controls = await window.electron.handle<FormControl[]>('form-control:get-all', projects.id);
   renderControls(controls);
-  (get('title') as HTMLParagraphElement).innerText = GUI.gui_name;
+  (get('title') as HTMLParagraphElement).innerText = PROJECT.name;
 });
 
 async function renderControls(controls: FormControl[]): Promise<void> {
@@ -55,8 +55,8 @@ async function onFormSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
 
     const entry = getFormValues(entryForm);
-    entry.gui_id = GUI.gui_id;
-    const changes = await window.electron.handle<number>('data:insert', GUI, entry);
+    entry.project_id = PROJECT.id;
+    const changes = await window.electron.handle<number>('entry:insert', PROJECT, entry);
     if (!changes) throw new Error();
 
     showMessage('Eintrag erfolgreich gespeichert', 'green');
